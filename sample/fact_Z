@@ -1,0 +1,3 @@
+(let f (lam g (lam x (iz x 1 (* x (app g (- x 1))))))
+(let Z (lam f (app (lam x (app f (lam y (app (app x x) y)))) (lam x (app f (lam y (app (app x x) y))))))
+(app (app Z f) 6)))
