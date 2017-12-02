@@ -5,13 +5,11 @@ import Exp (Exp(..))
 
 import Text.Printf (printf)
 
-import Data.List (intersperse)
-
-type Env = [(Char,Value)]
+type Env = [(String,Value)]
 
 data Value
     = Const Int
-    | Closure Char [Prog] Env
+    | Closure String [Prog] Env
 
 instance Show Value where
     show (Const n) = show n
@@ -22,10 +20,10 @@ data Prog
     | RPlus
     | RSub
     | RTimes
-    | RVar Char
-    | RLetin Char
+    | RVar String
+    | RLetin String
     | RPop
-    | RLam Char [Prog]
+    | RLam String [Prog]
     | RApp
     | RRestore [Prog] Env Cont
     | RIfZero [Prog] [Prog]
@@ -70,7 +68,7 @@ trans (Eval (r:rs) env cont) =
         (RLetin x,v:cont') -> Eval rs ((x,v):env) cont'
         (RPop,_) -> Eval rs (tail env) cont
         (RLam x p',_) -> Eval rs env (Closure x p' env:cont)
-        (RApp,v:Closure x p env':cont') -> Eval (concat [p,[RRestore rs env cont']]) ((x,v):('*',Closure x p env'):env') []
+        (RApp,v:Closure x p env':cont') -> Eval (concat [p,[RRestore rs env cont']]) ((x,v):("*",Closure x p env'):env') []
         (RRestore p env' cont',v:_) -> Eval p env' (v:cont')
         (RIfZero pt pf,Const n:cont')
             | n == 0    -> Eval (pt++rs) env cont'

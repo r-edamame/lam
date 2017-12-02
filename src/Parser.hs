@@ -15,7 +15,7 @@ data Raw
     | PPlus
     | PSub
     | PTimes
-    | PChar Char
+    | PStr String
     | PLet
     | PLam
     | PApp
@@ -30,19 +30,22 @@ toExp (PList l) =
         [PPlus, r1, r2] -> EPlus <$> toExp r1 <*> toExp r2
         [PSub, r1, r2]  -> ESub <$> toExp r1 <*> toExp r2
         [PTimes, r1, r2] -> ETimes <$> toExp r1 <*> toExp r2
-        [PLet,PChar x,r1,r2] -> ELet x <$> toExp r1 <*> toExp r2
-        [PLam,PChar x,r] -> ELam x <$> toExp r
+        [PLet,PStr x,r1,r2] -> ELet x <$> toExp r1 <*> toExp r2
+        [PLam,PStr x,r] -> ELam x <$> toExp r
         [PApp,r1,r2] -> EApp <$> toExp r1 <*> toExp r2
         [PIfZero,r1,r2,r3] -> EIfZero <$> toExp r1 <*> toExp r2 <*> toExp r3
         (PInt _:_) -> Left "integer is not primitive operator"
-        (PChar _:_) -> Left "variable is not primitive operator"
-        (PSelf:_) -> Left "self is not primitive operator"
-        (PList _:_) -> Left "fist arguments must be primitive operator"
+        --(PStr _:_) -> Left "variable is not primitive operator"
+        [PStr s,r] -> EApp (EVar s) <$> toExp r
+        --(PSelf:_) -> Left "self is not primitive operator"
+        [PSelf,r] -> EApp (EVar "*") <$> toExp r
+        --(PList _:_) -> Left "fist arguments must be primitive operator"
+        [PList rs,r] -> EApp <$> toExp (PList rs) <*> toExp r
         [] -> Left "empty expression is unavailable"
         _ -> Left "unavailable arguments"
 toExp (PInt n) = Right (EInt n)
-toExp (PChar x) = Right (EVar x)
-toExp PSelf = Right (EVar '*')
+toExp (PStr x) = Right (EVar x)
+toExp PSelf = Right (EVar "*")
 toExp _ = Left "primitive operator must be first argument"
 
 
@@ -50,7 +53,7 @@ int =  PInt . read <$> P.many1 P.digit
 plus = const PPlus <$> P.string "+"
 sub = const PSub <$> P.string "-"
 times = const PTimes <$> P.string "*"
-var = PChar <$> P.satisfy isLetter
+var = PStr <$> P.many1 (P.satisfy isLetter)
 let' = const PLet <$> P.try (P.string "let")
 lam = const PLam <$> P.try (P.string "lam")
 app = const PApp <$> P.try (P.string "app")

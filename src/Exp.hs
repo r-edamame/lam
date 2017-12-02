@@ -6,9 +6,9 @@ data Exp
     | EPlus Exp Exp
     | ESub Exp Exp
     | ETimes Exp Exp
-    | EVar Char
-    | ELet Char Exp Exp
-    | ELam Char Exp
+    | EVar String
+    | ELet String Exp Exp
+    | ELam String Exp
     | EApp Exp Exp
     | EIfZero Exp Exp Exp
     deriving Show
