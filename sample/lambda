@@ -1,0 +1,5 @@
+(let succ (lam n (lam f (lam x (f ((n f) x)))))
+(let zero (lam s (lam z z))
+(let three (succ (succ (succ zero)))
+(let conv (lam n ((n (lam x (+ x 1))) 0))
+(conv (succ three))))))
