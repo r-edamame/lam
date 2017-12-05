@@ -18,7 +18,6 @@ data Raw
     | PStr String
     | PLet
     | PLam
-    | PApp
     | PSelf
     | PIfZero
     deriving Show
@@ -32,14 +31,10 @@ toExp (PList l) =
         [PTimes, r1, r2] -> ETimes <$> toExp r1 <*> toExp r2
         [PLet,PStr x,r1,r2] -> ELet x <$> toExp r1 <*> toExp r2
         [PLam,PStr x,r] -> ELam x <$> toExp r
-        [PApp,r1,r2] -> EApp <$> toExp r1 <*> toExp r2
         [PIfZero,r1,r2,r3] -> EIfZero <$> toExp r1 <*> toExp r2 <*> toExp r3
         (PInt _:_) -> Left "integer is not primitive operator"
-        --(PStr _:_) -> Left "variable is not primitive operator"
         [PStr s,r] -> EApp (EVar s) <$> toExp r
-        --(PSelf:_) -> Left "self is not primitive operator"
         [PSelf,r] -> EApp (EVar "*") <$> toExp r
-        --(PList _:_) -> Left "fist arguments must be primitive operator"
         [PList rs,r] -> EApp <$> toExp (PList rs) <*> toExp r
         [] -> Left "empty expression is unavailable"
         _ -> Left "unavailable arguments"
@@ -56,11 +51,10 @@ times = const PTimes <$> P.string "*"
 var = PStr <$> P.many1 (P.satisfy isLetter)
 let' = const PLet <$> P.try (P.string "let")
 lam = const PLam <$> P.try (P.string "lam")
-app = const PApp <$> P.try (P.string "app")
 self = const PSelf <$> P.try (P.try (P.string "self"))
 iz = const PIfZero <$> P.try (P.string "iz")
 
-prim = int <|> plus <|> sub <|> times <|> let' <|> lam <|> app <|> self <|> iz <|> var
+prim = int <|> plus <|> sub <|> times <|> let' <|> lam <|> self <|> iz <|> var
 
 spaces = P.space <|> P.tab <|> P.newline
 ss = P.skipMany spaces
