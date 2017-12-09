@@ -1,1 +1,1 @@
-(let f (lam x (iz x 0 (iz (- x 1) 1 (+ (app self (- x 1)) (app self (- x 2)))))) (app f 11))
+(let fib (lam x (iz x 0 (iz (- x 1) 1 (+ (self (- x 1)) (self (- x 2)))))) (fib 11))
